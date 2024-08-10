@@ -25,7 +25,7 @@ public class Book {
     @Column(name = "publication_year", nullable = false)
     private LocalDateTime publicationYear;
 
-    @Column(name = "isbn", nullable = false, unique = true)
+    @Column(name = "isbn", nullable = false)
     private String ISBN;
 
     @Column(name = "meta_data", columnDefinition = "TEXT")
