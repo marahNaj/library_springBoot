@@ -1,12 +1,16 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Book;
-import com.example.demo.model.Patron;
+import com.example.demo.resources.BaseResponseApi;
 import com.example.demo.service.BookService;
+
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -17,40 +21,74 @@ public class BookController {
     private BookService bookService;
 
     @GetMapping
-    public List<Book> getAllBooks() {
-        return bookService.findAll();
+    public ResponseEntity<BaseResponseApi< List<Book> >> getAllBooks() {
+        List<Book> books= bookService.findAll();
+        BaseResponseApi< List<Book> > response = new BaseResponseApi<>(true, "Books retrieved successfully", books);
+        return ResponseEntity.ok(response); 
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Book> getPatronById(@PathVariable int id) {
-        return bookService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<BaseResponseApi<Book>> getBookById(@PathVariable int id) {
+
+        Optional<Book> bookOptional = bookService.findById(id);
+
+        if (bookOptional.isPresent()) {
+            BaseResponseApi<Book> response = new BaseResponseApi<>(true, "Book retrieved successfully", bookOptional.get());
+            return ResponseEntity.ok(response);
+        } else {
+            BaseResponseApi<Book> response = new BaseResponseApi<>(false, "Book not found", null);
+            return ResponseEntity.status(404).body(response); // Return 404 Not Found
+        }  
     }
 
     @PostMapping
-    public Book createBook(@RequestBody Book book) {
-        return bookService.save(book);
+    public ResponseEntity<BaseResponseApi<Book>> createBook(@RequestBody Book book) {
+        Book Newbook = bookService.save(book);
+        BaseResponseApi<Book> response = new BaseResponseApi<>(true, "Create Book successfully", Newbook);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updatePatron(@PathVariable int id, @RequestBody Book bookDetails) {
-        return bookService.findById(id)
-                .map(book -> {
-                    // book.setFirstName(bookDetails.getFirstName());
-                    // book.setEmailAddress(bookDetails.getEmailAddress());
-                    return ResponseEntity.ok(bookService.save(book));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<BaseResponseApi<Book>> updateBook(@PathVariable int id, @RequestBody Book bookDetails) {
+
+        Optional<Book> bookOptional = bookService.findById(id);
+
+        if (bookOptional.isPresent()) {
+            Book updatedBook =  bookOptional.get();
+            updatedBook.setTitle(bookDetails.getTitle());
+            updatedBook.setAuthor(bookDetails.getAuthor());
+            updatedBook.setPublicationYear(bookDetails.getPublicationYear());
+            updatedBook.setISBN(bookDetails.getISBN());
+            updatedBook.setMetaData(bookDetails.getMetaData());
+            updatedBook.setUpdatedAt();
+            bookService.save(updatedBook);
+            BaseResponseApi<Book> response = new BaseResponseApi<>(true, "Book updated successfully", updatedBook);
+            return ResponseEntity.ok(response);
+        } else {
+            BaseResponseApi<Book> response = new BaseResponseApi<>(false, "Book not found", null);
+            return ResponseEntity.status(404).body(response); // Return 404 Not Found
+        }  
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePatron(@PathVariable int id) {
-        return bookService.findById(id)
-                .map(patron -> {
-                    bookService.deleteById(id);
-                    return ResponseEntity.ok().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<BaseResponseApi<Void>> deleteBook(@PathVariable int id) {
+        Optional<Book> bookOptional = bookService.findById(id);
+
+        if (bookOptional.isPresent()) { 
+            if(!bookOptional.get().getBorrowingRecords().isEmpty()) {
+                BaseResponseApi<Void> response = new BaseResponseApi<>(false, "You Cannot delete Book, it's Borrowing for patrons ", null);
+                return ResponseEntity.ok(response);
+            } else {
+                bookService.deleteById(id);
+                BaseResponseApi<Void> response = new BaseResponseApi<>(false, "Delete Book successfully", null);
+                return ResponseEntity.ok(response);
+    
+            }
+        }
+        else {
+            BaseResponseApi<Void> response = new BaseResponseApi<>(false, "Book not found", null);
+            return ResponseEntity.status(404).body(response); // Return 404 Not Found
+        }  
+        
     }
 }

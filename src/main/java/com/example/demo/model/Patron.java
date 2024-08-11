@@ -5,6 +5,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.example.demo.model.BorrowingRecord;
 import java.util.Set;
+import java.util.List;
+
 
 import java.time.LocalDateTime;
 
@@ -34,7 +36,7 @@ public class Patron {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "patron", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<BorrowingRecord> borrowingRecords;
+    private List<BorrowingRecord> borrowingRecords;
 
     // Constructors
     public Patron() {}
@@ -80,5 +82,11 @@ public class Patron {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+    public void setUpdatedAt() {
+        this.updatedAt = LocalDateTime.now();
+    }
+    public List<BorrowingRecord> getBorrowingRecords () {
+        return this.borrowingRecords;
     }
 }

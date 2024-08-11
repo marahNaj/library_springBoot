@@ -5,6 +5,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.example.demo.model.BorrowingRecord;
 import java.util.Set;
+import java.util.List;
 
 import java.time.LocalDateTime;
 
@@ -28,6 +29,9 @@ public class Book {
     @Column(name = "isbn", nullable = false)
     private String ISBN;
 
+    @Column(name = "avaliable", nullable = false)
+    private Boolean avaliable;
+
     @Column(name = "meta_data", columnDefinition = "TEXT")
     private String metaData;
 
@@ -40,7 +44,7 @@ public class Book {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<BorrowingRecord> borrowingRecords;
+    private List<BorrowingRecord> borrowingRecords;
 
     // Constructors
     public Book() {}
@@ -104,5 +108,20 @@ public class Book {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+    public void setUpdatedAt() {
+        this.updatedAt = LocalDateTime.now();
+    }
+    public boolean isAvailable() {
+        return this.avaliable;
+
+    }
+    public void setAvailable(boolean avaliable) {
+         this.avaliable = avaliable;
+
+    }
+    public List<BorrowingRecord> getBorrowingRecords() {
+        return this.borrowingRecords;
+
     }
 }
