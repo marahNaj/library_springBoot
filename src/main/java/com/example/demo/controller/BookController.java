@@ -43,7 +43,15 @@ public class BookController {
 
     @PostMapping
     public ResponseEntity<BaseResponseApi<Book>> createBook(@RequestBody Book book) {
-        Book Newbook = bookService.save(book);
+        Book Newbook = new Book();
+        Newbook.setTitle(book.getTitle());
+        Newbook.setAuthor(book.getAuthor());
+        Newbook.setPublicationYear(book.getPublicationYear());
+        Newbook.setISBN(book.getISBN());
+        Newbook.setMetaData(book.getMetaData());
+        Newbook.setMetaData(book.getMetaData());
+        Newbook.setAvailable(false);
+        bookService.save(Newbook);
         BaseResponseApi<Book> response = new BaseResponseApi<>(true, "Create Book successfully", Newbook);
         return ResponseEntity.ok(response);
     }
